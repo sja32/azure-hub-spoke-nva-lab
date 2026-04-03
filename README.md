@@ -1,5 +1,7 @@
 ## 🚀 Azure Hub-Spoke NVA Lab (Terraform)
 
+This project demonstrates building a hub-spoke network architecture in Azure using Terraform, including routing through a Network Virtual Appliance (NVA).
+
 \# Azure Hub-Spoke NVA Lab
 
 
