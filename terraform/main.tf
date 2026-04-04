@@ -109,3 +109,38 @@ resource "azurerm_virtual_network_peering" "vnet3_to_vnet2" {
   allow_gateway_transit        = false
   use_remote_gateways          = false
 }
+
+resource "azurerm_route_table" "spoke_rt" {
+  name                          = "rt-spoke-routing"
+  location                      = azurerm_resource_group.rg.location
+  resource_group_name           = azurerm_resource_group.rg.name
+  bgp_route_propagation_enabled = false
+}
+
+resource "azurerm_route" "to_vnet3" {
+  name                   = "to-vnet3"
+  resource_group_name    = azurerm_resource_group.rg.name
+  route_table_name       = azurerm_route_table.spoke_rt.name
+  address_prefix         = "10.3.1.0/24"
+  next_hop_type          = "VirtualAppliance"
+  next_hop_in_ip_address = "10.2.1.4"
+}
+
+resource "azurerm_route" "to_vnet1" {
+  name                   = "to-vnet1"
+  resource_group_name    = azurerm_resource_group.rg.name
+  route_table_name       = azurerm_route_table.spoke_rt.name
+  address_prefix         = "10.1.1.0/24"
+  next_hop_type          = "VirtualAppliance"
+  next_hop_in_ip_address = "10.2.1.4"
+}
+
+resource "azurerm_subnet_route_table_association" "subnet1_assoc" {
+  subnet_id      = azurerm_subnet.subnet1.id
+  route_table_id = azurerm_route_table.spoke_rt.id
+}
+
+resource "azurerm_subnet_route_table_association" "subnet3_assoc" {
+  subnet_id      = azurerm_subnet.subnet3.id
+  route_table_id = azurerm_route_table.spoke_rt.id
+}
