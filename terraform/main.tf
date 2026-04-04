@@ -11,11 +11,53 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = "f973a15e-5434-434c-993b-5dd9e4958952"
+  subscription_id                 = "f973a15e-5434-434c-993b-5dd9e4958952"
   resource_provider_registrations = "none"
 }
 
 resource "azurerm_resource_group" "rg" {
   name     = "rg-az700-vnet-lab"
   location = "East US"
+}
+
+resource "azurerm_virtual_network" "vnet1" {
+  name                = "vnet1"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.1.0.0/16"]
+}
+
+resource "azurerm_subnet" "subnet1" {
+  name                 = "default"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet1.name
+  address_prefixes     = ["10.1.1.0/24"]
+}
+
+resource "azurerm_virtual_network" "vnet2" {
+  name                = "vnet2"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.2.0.0/16"]
+}
+
+resource "azurerm_subnet" "subnet2" {
+  name                 = "default"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet2.name
+  address_prefixes     = ["10.2.1.0/24"]
+}
+
+resource "azurerm_virtual_network" "vnet3" {
+  name                = "vnet3"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.3.0.0/16"]
+}
+
+resource "azurerm_subnet" "subnet3" {
+  name                 = "default"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet3.name
+  address_prefixes     = ["10.3.1.0/24"]
 }
