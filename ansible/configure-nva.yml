@@ -1,7 +1,7 @@
 ---
 - name: Configure Azure NVA for IP forwarding and NAT
   hosts: all
-  become: true
+  become: false
 
   vars:
     nva_out_interface: eth0
