@@ -1,0 +1,34 @@
+---
+- name: Configure Azure NVA for IP forwarding and NAT
+  hosts: all
+  become: true
+
+  vars:
+    nva_out_interface: eth0
+
+  tasks:
+    - name: Enable IPv4 forwarding now and persistently
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        state: present
+        reload: true
+
+    - name: Install iptables-persistent
+      ansible.builtin.apt:
+        name: iptables-persistent
+        state: present
+        update_cache: true
+
+    - name: Add NAT masquerade rule
+      ansible.builtin.iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: "{{ nva_out_interface }}"
+        jump: MASQUERADE
+        state: present
+
+    - name: Save IPv4 iptables rules
+      ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+      args:
+        executable: /bin/bash
