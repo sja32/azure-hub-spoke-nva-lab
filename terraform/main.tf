@@ -144,3 +144,53 @@ resource "azurerm_subnet_route_table_association" "subnet3_assoc" {
   subnet_id      = azurerm_subnet.subnet3.id
   route_table_id = azurerm_route_table.spoke_rt.id
 }
+
+resource "azurerm_public_ip" "nva_pip" {
+  name                = "vm-vnet2-ip"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_network_interface" "nva_nic" {
+  name                = "vm-vnet2-nic"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_forwarding_enabled = true
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet2.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.2.1.4"
+    public_ip_address_id          = azurerm_public_ip.nva_pip.id
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "nva_vm" {
+  name                = "vm-vnet2"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  size                = "Standard_D2s_v3"
+  admin_username      = "allensj"
+  network_interface_ids = [
+    azurerm_network_interface.nva_nic.id
+  ]
+
+  disable_password_authentication = false
+  admin_password                  = "Luasi965!"
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
